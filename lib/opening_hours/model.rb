@@ -43,7 +43,7 @@ module OpeningHours
     def define_hours(&block)
       raise ArgumentError, "define_hours requires a block" unless block
 
-      OpeningHours::Builder.build(&block).tap do |schedule|
+      OpeningHours::Schedule.build(&block).tap do |schedule|
         write_opening_hours_data(self.class.opening_hours_type.serialize(schedule))
       end
     end

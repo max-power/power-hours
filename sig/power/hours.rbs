@@ -43,6 +43,7 @@ module OpeningHours
     attr_reader fri: Array[OpeningHours::TimeWindow]
     attr_reader sat: Array[OpeningHours::TimeWindow]
 
+    def self.build: () { () -> untyped } -> OpeningHours::Schedule
     def self.from_hash: (Hash[Symbol | String, untyped] hash) -> OpeningHours::Schedule
     def initialize: (
       ?mon: day_windows_input,

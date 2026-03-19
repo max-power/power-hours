@@ -27,11 +27,10 @@ gem install power-hours
 ```ruby
 require "opening_hours"
 
-builder = OpeningHours::Builder.new
-builder.mon "09:00".."12:00", "13:00".."17:00"
-builder.fri "22:00".."02:00"
-
-schedule = builder.schedule
+schedule = OpeningHours::Schedule.build do
+  mon "09:00".."12:00", "13:00".."17:00"
+  fri "22:00".."02:00"
+end
 
 schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0)) # => true (Monday)
 schedule.open?(at: Time.new(2024, 1, 6, 1, 0, 0))  # => true (Saturday, from Friday overnight)

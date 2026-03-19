@@ -3,6 +3,14 @@
 module OpeningHours
   class Schedule < Data.define(:sun, :mon, :tue, :wed, :thu, :fri, :sat)
     class << self
+      def build(&block)
+        raise ArgumentError, "Schedule.build requires a block" unless block
+
+        builder = Builder.new
+        builder.instance_eval(&block)
+        builder.schedule
+      end
+
       def from_hash(hash)
         new(**hash.to_h.transform_keys(&:to_sym))
       end

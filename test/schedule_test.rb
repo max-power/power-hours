@@ -1,6 +1,20 @@
 # frozen_string_literal: true
 
 class ScheduleTest < Minitest::Test
+  def test_build_creates_schedule_via_dsl
+    schedule = Schedule.build do
+      mon "09:00".."12:00", "13:00".."17:00"
+      fri "22:00".."02:00"
+    end
+
+    assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0)) # Monday
+    assert schedule.open?(at: Time.new(2024, 1, 6, 1, 0, 0))  # Saturday (Friday overnight)
+  end
+
+  def test_build_requires_a_block
+    assert_raises(ArgumentError) { Schedule.build }
+  end
+
   def test_open_during_same_day_window
     schedule = Schedule.new(
       mon: ["09:00-17:00"]
