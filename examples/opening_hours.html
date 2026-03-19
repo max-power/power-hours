@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opening Hours Multi-Window Test</title>
+    <style>
+      :root {
+        --paper: #f8fafc;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --panel: #ffffff;
+        --accent: #4f46e5;
+        --danger: #b91c1c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 16px 12px;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        accent-color: var(--accent);
+      }
+
+      .playground-grid {
+        max-width: 980px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        align-items: start;
+      }
+
+      .hours-editor {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: 0 3px 10px rgba(17, 24, 39, 0.06);
+      }
+
+      .editor-header {
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 8px;
+      }
+
+      .editor-header h2 {
+        margin: 0;
+        font-size: 1.05rem;
+        letter-spacing: 0.01em;
+      }
+
+      .editor-header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .day-card {
+        border-bottom: 1px solid var(--line);
+        padding: 8px 0;
+        margin-bottom: 0;
+        background: transparent;
+      }
+
+      .day-grid {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+      }
+
+      .day-label {
+        font-weight: 700;
+        text-transform: none;
+        font-size: 0.78rem;
+        letter-spacing: 0.01em;
+        color: #374151;
+      }
+
+      .day-content {
+        min-width: 0;
+      }
+
+      .window-row {
+        display: flex;
+        width: fit-content;
+        align-items: stretch;
+        gap: 0;
+        margin-bottom: 6px;
+        border-radius: 7px;
+      }
+
+      .time-range {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #cbd5e1;
+        border-right: 0;
+        border-radius: 7px 0 0 7px;
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .time-range input[type="time"] {
+        width: fit-content;
+        padding: 5px 6px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 0.78rem;
+      }
+
+      .window-row:focus-within {
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+      }
+
+      .window-row:focus-within .time-range,
+      .window-row:focus-within .btn-remove {
+        border-color: var(--accent);
+      }
+
+      .window-sep {
+        padding: 0 2px;
+        color: #6b7280;
+        font-weight: 700;
+      }
+
+      .btn {
+        border: 1px solid transparent;
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+
+      .btn-add {
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #fff;
+        padding: 2px 8px;
+        color: #4b5563;
+        font-size: 0.74rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .btn-add:hover {
+        color: #374151;
+        border-color: #9ca3af;
+        background: #f9fafb;
+      }
+
+      .btn-remove {
+        padding: 0 8px;
+        border-radius: 0 7px 7px 0;
+        border-color: #d1d5db;
+        background: #fff;
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
+      }
+
+      .btn-remove:hover {
+        color: #374151;
+        border-color: #9ca3af;
+        background: #f9fafb;
+      }
+
+      .day-actions {
+        margin-top: 4px;
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .debug-panel {
+        padding: 10px;
+        background: #111827;
+        color: #d1d5db;
+        border-radius: 8px;
+        border: 1px solid #374151;
+      }
+
+      .debug-panel strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #f3f4f6;
+      }
+
+      .debug-tools {
+        margin-bottom: 8px;
+        font-size: 0.75rem;
+      }
+
+      .debug-tools label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #cbd5e1;
+        cursor: pointer;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        font-size: 0.75rem;
+      }
+
+      @media (max-width: 900px) {
+        .playground-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .day-grid {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div data-controller="opening-hours">
+      <div class="playground-grid">
+        <div class="hours-editor">
+          <div class="editor-header">
+            <h2>Business Availability</h2>
+            <p>
+              Multiple time windows per day, directly mapped to Schedule ranges.
+            </p>
+          </div>
+
+          <div id="hours-container" data-opening-hours-target="container"></div>
+        </div>
+
+        <div class="debug-panel">
+          <strong
+            >Rails Params Payload (business[opening_hours][day][])
+          </strong>
+          <div class="debug-tools">
+            <label>
+              <input
+                type="checkbox"
+                data-opening-hours-target="includeEmpty"
+                data-action="change->opening-hours#refreshPayload"
+              />
+              Include empty weekdays in payload
+            </label>
+          </div>
+          <pre data-opening-hours-target="debugOutput">{}</pre>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/@hotwired/stimulus/dist/stimulus.umd.js"></script>
+    <script src="./opening_hours_controller.js"></script>
+    <script>
+      const application = Stimulus.Application.start();
+      application.register("opening-hours", window.OpeningHoursController);
+    </script>
+  </body>
+</html>
