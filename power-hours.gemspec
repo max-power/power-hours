@@ -5,12 +5,12 @@ require_relative "lib/opening_hours/version"
 Gem::Specification.new do |spec|
   spec.name = "power-hours"
   spec.version = OpeningHours::VERSION
-  spec.authors = ["Max Power"]
+  spec.authors = ["Kevin Melchert"]
   spec.email = ["kevin.melchert@gmail.com"]
 
   spec.summary = "Simple opening-hours DSL with overnight window support."
   spec.description = "Power Hours models weekly opening windows, including overnight ranges, with a small Ruby DSL and optional model mixin helpers."
-  spec.homepage = "https://github.com/kevin/power-hours"
+  spec.homepage = "https://github.com/max-power/power-hours"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
