@@ -4,5 +4,6 @@
 /coverage/
 /doc/
 /pkg/
+*.gem
 /spec/reports/
 /tmp/
