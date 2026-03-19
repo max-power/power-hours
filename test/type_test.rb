@@ -26,6 +26,22 @@ class TypeTest < Minitest::Test
     assert_same schedule, @type.cast(schedule)
   end
 
+  def test_cast_hash_like_object_with_to_h
+    value = Class.new do
+      def initialize(hash)
+        @hash = hash
+      end
+
+      def to_h
+        @hash
+      end
+    end.new("mon" => ["09:00-17:00"])
+
+    schedule = @type.cast(value)
+
+    assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0))
+  end
+
   def test_serialize_schedule_returns_hash
     schedule = Schedule.new(mon: ["09:00-17:00"])
 

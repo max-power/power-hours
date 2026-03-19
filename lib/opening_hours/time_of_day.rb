@@ -1,6 +1,7 @@
 module OpeningHours
   class TimeOfDay
     include Comparable
+    REGEX = /\A(\d{1,2})(?::(\d{1,2}))?\z/.freeze
 
     def self.[](input)
       input.is_a?(self) ? input : new(input)
@@ -35,7 +36,7 @@ module OpeningHours
     private
 
     def parse(input)
-      match = /\A(\d{1,2})(?::(\d{1,2}))?\z/.match(input.to_s.strip)
+      match = REGEX.match(input.to_s.strip)
       raise ArgumentError, "Invalid time: #{input.inspect}" unless match
 
       [match[1].to_i, (match[2] || 0).to_i]

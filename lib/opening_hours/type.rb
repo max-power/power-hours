@@ -24,20 +24,24 @@ module OpeningHours
 
     def coerce(value)
       case value
-      when nil
+      in nil
         OpeningHours::Schedule.new
-      when OpeningHours::Schedule
-        value
-      when Hash
-        OpeningHours::Schedule.from_hash(value)
+      in OpeningHours::Schedule => schedule
+        schedule
+      in Hash => hash
+        OpeningHours::Schedule.from_hash(hash)
+      in candidate if (hash = hash_from(candidate))
+        OpeningHours::Schedule.from_hash(hash)
       else
-        if value.respond_to?(:to_h)
-          hash = value.to_h
-          return OpeningHours::Schedule.from_hash(hash) if hash.is_a?(Hash)
-        end
-
         raise ArgumentError, "Cannot cast #{value.inspect} to OpeningHours::Schedule"
       end
+    end
+
+    def hash_from(value)
+      return unless value.respond_to?(:to_h)
+
+      hash = value.to_h
+      hash if hash.is_a?(Hash)
     end
   end
 end
