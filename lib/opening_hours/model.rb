@@ -16,7 +16,7 @@ module OpeningHours
 
     class_methods do
       def opening_hours_column(name = nil)
-        if name.present?
+        unless name.nil?
           self.opening_hours_column_name = name.to_sym
           register_opening_hours_attribute!
         end

@@ -68,15 +68,6 @@ class TypeTest < Minitest::Test
     assert @type.changed_in_place?(old_value, different_value)
   end
 
-  def test_changed_in_place_detects_in_place_schedule_mutation
-    schedule = Schedule.new(mon: ["09:00-17:00"])
-    raw_old_value = @type.serialize(schedule)
-
-    schedule.mon << TimeWindow["18:00-20:00"]
-
-    assert @type.changed_in_place?(raw_old_value, schedule)
-  end
-
   def test_invalid_cast_raises
     assert_raises(ArgumentError) { @type.cast(123) }
   end

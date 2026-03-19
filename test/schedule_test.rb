@@ -15,6 +15,22 @@ class ScheduleTest < Minitest::Test
     assert_equal Schedule.new, Schedule.build
   end
 
+  def test_day_arrays_are_immutable
+    schedule = Schedule.new(mon: ["09:00-17:00"])
+
+    assert schedule.mon.frozen?
+    assert_raises(FrozenError) { schedule.mon << TimeWindow["18:00-20:00"] }
+  end
+
+  def test_day_arrays_are_immutable_when_built_via_dsl
+    schedule = Schedule.build do
+      mon "09:00".."17:00"
+    end
+
+    assert schedule.mon.frozen?
+    assert_raises(FrozenError) { schedule.mon << TimeWindow["18:00-20:00"] }
+  end
+
   def test_open_during_same_day_window
     schedule = Schedule.new(
       mon: ["09:00-17:00"]

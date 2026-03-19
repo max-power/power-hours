@@ -45,7 +45,7 @@ module OpeningHours
     private
 
     def normalize_day(values)
-      Array(values).map { TimeWindow[it] }
+      Array(values).map { TimeWindow[it] }.freeze
     end
 
     # Check current day windows + previous day's overnight leftovers

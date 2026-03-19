@@ -10,7 +10,7 @@ module OpeningHours
 
     Schedule.members.each do |day|
       define_method(day) do |*ranges|
-        windows = ranges.map { |range| TimeWindow[range] }
+        windows = ranges.map { |range| TimeWindow[range] }.freeze
         @schedule = @schedule.with(day => windows)
       end
     end
