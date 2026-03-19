@@ -1,0 +1,25 @@
+<div data-controller="business-hours" class="hours-editor">
+  <template data-business-hours-target="rowTemplate">
+    <div class="day-row">
+      <span class="day-label" data-day-label></span>
+
+      <input
+        type="range"
+        min="0"
+        max="1439"
+        step="30"
+        class="time-slider"
+        data-action="input->business-hours#update"
+        data-business-hours-target="startSlider"
+      />
+
+      <div class="time-display">
+        <span data-business-hours-target="display">Closed</span>
+      </div>
+
+      <input type="hidden" data-business-hours-target="hiddenInput" />
+    </div>
+  </template>
+
+  <div id="hours-container"></div>
+</div>

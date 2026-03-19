@@ -1,0 +1,93 @@
+module OpeningHours
+  type day = :sun | :mon | :tue | :wed | :thu | :fri | :sat
+  type time_input = Integer | String | Time | OpeningHours::TimeOfDay
+  type time_window_input = OpeningHours::TimeWindow | Range[time_input] | [time_input, time_input] | String
+  type day_windows_input = nil | time_window_input | Array[time_window_input]
+  type serialized_schedule = Hash[day, Array[String]]
+
+  VERSION: String
+
+  class TimeOfDay
+    include Comparable[time_input]
+
+    attr_reader hour: Integer
+    attr_reader min: Integer
+
+    def self.[]: (time_input input) -> OpeningHours::TimeOfDay
+    def initialize: (time_input input) -> void
+
+    def <=>: (time_input other) -> Integer?
+    def to_minutes: () -> Integer
+    def to_s: () -> String
+  end
+
+  class TimeWindow
+    attr_reader opens: OpeningHours::TimeOfDay
+    attr_reader closes: OpeningHours::TimeOfDay
+
+    def self.[]: (time_window_input input) -> OpeningHours::TimeWindow
+    def initialize: (opens: time_input, closes: time_input) -> void
+
+    def to_a: () -> [OpeningHours::TimeOfDay, OpeningHours::TimeOfDay]
+    def to_s: () -> String
+    def overnight?: () -> bool
+    def cover?: (time_input value) -> bool
+  end
+
+  class Schedule
+    attr_reader sun: Array[OpeningHours::TimeWindow]
+    attr_reader mon: Array[OpeningHours::TimeWindow]
+    attr_reader tue: Array[OpeningHours::TimeWindow]
+    attr_reader wed: Array[OpeningHours::TimeWindow]
+    attr_reader thu: Array[OpeningHours::TimeWindow]
+    attr_reader fri: Array[OpeningHours::TimeWindow]
+    attr_reader sat: Array[OpeningHours::TimeWindow]
+
+    def self.from_hash: (Hash[Symbol | String, untyped] hash) -> OpeningHours::Schedule
+    def initialize: (
+      ?mon: day_windows_input,
+      ?tue: day_windows_input,
+      ?wed: day_windows_input,
+      ?thu: day_windows_input,
+      ?fri: day_windows_input,
+      ?sat: day_windows_input,
+      ?sun: day_windows_input
+    ) -> void
+
+    def open?: (?at: untyped) -> bool
+    def to_h: () -> serialized_schedule
+    def as_json: (*untyped) -> serialized_schedule
+  end
+
+  class Builder
+    attr_reader schedule: OpeningHours::Schedule
+
+    def initialize: () -> void
+
+    def sun: (*time_window_input ranges) -> OpeningHours::Schedule
+    def mon: (*time_window_input ranges) -> OpeningHours::Schedule
+    def tue: (*time_window_input ranges) -> OpeningHours::Schedule
+    def wed: (*time_window_input ranges) -> OpeningHours::Schedule
+    def thu: (*time_window_input ranges) -> OpeningHours::Schedule
+    def fri: (*time_window_input ranges) -> OpeningHours::Schedule
+    def sat: (*time_window_input ranges) -> OpeningHours::Schedule
+  end
+
+  class Type
+    def type: () -> Symbol
+    def cast: (untyped value) -> OpeningHours::Schedule
+    def deserialize: (untyped value) -> OpeningHours::Schedule
+    def serialize: (untyped value) -> serialized_schedule
+    def changed_in_place?: (untyped raw_old_value, untyped new_value) -> bool
+  end
+
+  module Model
+    module ClassMethods
+      def opening_hours_column: (?Symbol name) -> Symbol
+      def opening_hours_type: () -> OpeningHours::Type
+    end
+
+    def define_hours: () { () -> untyped } -> OpeningHours::Schedule
+    def open?: (?at: untyped) -> bool
+  end
+end

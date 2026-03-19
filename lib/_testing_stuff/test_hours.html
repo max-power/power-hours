@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opening Hours DSL Test</title>
+    <style>
+      /* The CSS file we discussed */
+      .hours-editor {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .editor-header {
+        margin-bottom: 20px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+      }
+
+      .day-row {
+        display: grid;
+        grid-template-columns: 60px 1fr 140px;
+        align-items: center;
+        gap: 1rem;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .day-row:last-child {
+        border-bottom: none;
+      }
+
+      .day-label {
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #666;
+      }
+
+      .time-slider {
+        width: 100%;
+        cursor: pointer;
+        accent-color: #2563eb;
+      }
+
+      .time-display {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #1e293b;
+      }
+
+      .debug-panel {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 15px;
+        background: #1e1e1e;
+        color: #adbac7;
+        border-radius: 8px;
+        font-size: 0.8rem;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hours-editor">
+      <div class="editor-header">
+        <h2 style="margin: 0">Business Availability</h2>
+        <small style="color: #666"
+          >Drag sliders to set 4-hour delivery windows</small
+        >
+      </div>
+
+      <div id="hours-container"></div>
+    </div>
+
+    <div class="debug-panel">
+      <strong>Rails Params Payload (What the DSL sees):</strong>
+      <pre id="debug-output">{}</pre>
+    </div>
+
+    <script>
+      const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+      const container = document.getElementById("hours-container");
+      const debug = document.getElementById("debug-output");
+
+      // State to simulate the Rails params hash
+      let payload = {};
+
+      function minutesToTime(totalMinutes) {
+        const hours = Math.floor(totalMinutes / 60) % 24;
+        const minutes = totalMinutes % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      }
+
+      function updateDay(day, val) {
+        const startMins = parseInt(val);
+        const endMins = (startMins + 240) % 1440; // 4 hour window
+
+        const startStr = minutesToTime(startMins);
+        const endStr = minutesToTime(endMins);
+        const rangeStr = `${startStr}..${endStr}`;
+
+        // Update UI
+        document.getElementById(`display-${day}`).textContent =
+          `${startStr} - ${endStr}`;
+
+        // Update Mock Payload
+        payload[day] = [rangeStr];
+        debug.textContent = JSON.stringify(
+          { business: { opening_hours: payload } },
+          null,
+          2,
+        );
+      }
+
+      // Build the rows
+      days.forEach((day) => {
+        const row = document.createElement("div");
+        row.className = "day-row";
+        row.innerHTML = `
+            <span class="day-label">${day}</span>
+            <input type="range" min="480" max="1200" step="30" value="540"
+                   class="time-slider"
+                   oninput="updateDay('${day}', this.value)">
+            <div class="time-display" id="display-${day}">09:00 - 13:00</div>
+        `;
+        container.appendChild(row);
+
+        // Initialize payload
+        updateDay(day, 540);
+      });
+    </script>
+  </body>
+</html>
