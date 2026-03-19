@@ -58,9 +58,19 @@ schedule.to_h
 #   fri: ["22:00-02:00"],
 #   sat: []
 # }
+
+schedule.as_json
+# {
+#   mon: ["09:00-17:00"],
+#   fri: ["22:00-02:00"]
+# }
+
+schedule.as_json(include_empty: true) # include empty weekdays too
 ```
 
 ### Optional mixin for app models
+
+`OpeningHours::Model` is a Rails integration mixin (uses typed attributes).
 
 ```ruby
 class Venue < ApplicationRecord

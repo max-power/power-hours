@@ -4,7 +4,7 @@ module OpeningHours
   class Schedule < Data.define(:sun, :mon, :tue, :wed, :thu, :fri, :sat)
     class << self
       def build(&block)
-        raise ArgumentError, "Schedule.build requires a block" unless block
+        return new unless block_given?
 
         builder = Builder.new
         builder.instance_eval(&block)
@@ -28,24 +28,21 @@ module OpeningHours
       )
     end
 
-    def open?(at: default_time)
+    def open?(at: Time.now)
       current_time = at.strftime("%H:%M")
-      windows_to_check(at).any? { it.cover?(current_time) }
+      windows_to_check(at).any? { |window| window.cover?(current_time) }
     end
 
     def to_h
       super.transform_values { |windows| windows.map(&:to_s) }
     end
 
-    def as_json(*)
-      to_h
+    def as_json(options = nil)
+      include_empty = options.is_a?(Hash) && options[:include_empty]
+      include_empty ? to_h : to_h.reject { |_day, windows| windows.empty? }
     end
 
     private
-
-    def default_time
-      Time.respond_to?(:current) ? Time.current : Time.now
-    end
 
     def normalize_day(values)
       Array(values).map { TimeWindow[it] }

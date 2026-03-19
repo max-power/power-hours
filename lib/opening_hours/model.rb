@@ -1,85 +1,45 @@
 # frozen_string_literal: true
 
+require "active_support/concern"
+require "active_support/core_ext/module/delegation"
+require "active_support/core_ext/time"
+
 module OpeningHours
   module Model
-    def self.included(base)
-      base.extend(ClassMethods)
+    extend ActiveSupport::Concern
 
-      if base.respond_to?(:attribute)
-        base.attribute(base.opening_hours_column, base.opening_hours_type)
-      end
+    included do
+      class_attribute :opening_hours_column_name, instance_accessor: false, default: :opening_hours
+      register_opening_hours_attribute!
+      delegate :opening_hours_column, to: :class
     end
 
-    module ClassMethods
+    class_methods do
       def opening_hours_column(name = nil)
-        if name.nil?
-          return @opening_hours_column if defined?(@opening_hours_column)
-
-          return superclass.opening_hours_column if superclass.respond_to?(:opening_hours_column)
-
-          return :opening_hours
+        if name.present?
+          self.opening_hours_column_name = name.to_sym
+          register_opening_hours_attribute!
         end
 
-        @opening_hours_column = name.to_sym
-
-        if respond_to?(:attribute)
-          attribute(@opening_hours_column, opening_hours_type)
-        end
-
-        @opening_hours_column
+        opening_hours_column_name
       end
 
-      def opening_hours_type
-        return @opening_hours_type if defined?(@opening_hours_type)
+      private
 
-        @opening_hours_type = if superclass.respond_to?(:opening_hours_type)
-          superclass.opening_hours_type
-        else
-          OpeningHours::Type.new
-        end
+      def register_opening_hours_attribute!
+        attribute(opening_hours_column_name, OpeningHours::Type.new, default: -> { OpeningHours::Schedule.new })
       end
     end
 
     def define_hours(&block)
-      raise ArgumentError, "define_hours requires a block" unless block
-
       OpeningHours::Schedule.build(&block).tap do |schedule|
-        write_opening_hours_data(self.class.opening_hours_type.serialize(schedule))
+        public_send(:"#{opening_hours_column}=", schedule)
       end
     end
 
-    def open?(at: default_time)
-      current_schedule.open?(at: apply_timezone(at))
-    end
-
-    private
-
-    def current_schedule
-      self.class.opening_hours_type.cast(read_opening_hours_data)
-    end
-
-    def opening_hours_column_name
-      self.class.respond_to?(:opening_hours_column) ? self.class.opening_hours_column : :opening_hours
-    end
-
-    def read_opening_hours_data
-      public_send(opening_hours_column_name)
-    end
-
-    def write_opening_hours_data(value)
-      public_send(:"#{opening_hours_column_name}=", value)
-    end
-
-    def default_time
-      Time.respond_to?(:current) ? Time.current : Time.now
-    end
-
-    def apply_timezone(time)
-      return time unless respond_to?(:timezone)
-      return time if timezone.nil? || timezone.to_s.strip.empty?
-      return time unless time.respond_to?(:in_time_zone)
-
-      time.in_time_zone(timezone)
+    def open?(at: Time.current)
+      zone = respond_to?(:timezone) ? timezone.presence : nil
+      public_send(opening_hours_column).open?(at: zone ? at.in_time_zone(zone) : at)
     end
   end
 end

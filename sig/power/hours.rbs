@@ -43,7 +43,8 @@ module OpeningHours
     attr_reader fri: Array[OpeningHours::TimeWindow]
     attr_reader sat: Array[OpeningHours::TimeWindow]
 
-    def self.build: () { () -> untyped } -> OpeningHours::Schedule
+    def self.build: () -> OpeningHours::Schedule
+                | () { () -> untyped } -> OpeningHours::Schedule
     def self.from_hash: (Hash[Symbol | String, untyped] hash) -> OpeningHours::Schedule
     def initialize: (
       ?mon: day_windows_input,
@@ -57,7 +58,7 @@ module OpeningHours
 
     def open?: (?at: untyped) -> bool
     def to_h: () -> serialized_schedule
-    def as_json: (*untyped) -> serialized_schedule
+    def as_json: (?Hash[Symbol, untyped] options) -> serialized_schedule
   end
 
   class Builder
@@ -77,7 +78,6 @@ module OpeningHours
   class Type
     def type: () -> Symbol
     def cast: (untyped value) -> OpeningHours::Schedule
-    def deserialize: (untyped value) -> OpeningHours::Schedule
     def serialize: (untyped value) -> serialized_schedule
     def changed_in_place?: (untyped raw_old_value, untyped new_value) -> bool
   end
@@ -85,10 +85,10 @@ module OpeningHours
   module Model
     module ClassMethods
       def opening_hours_column: (?Symbol name) -> Symbol
-      def opening_hours_type: () -> OpeningHours::Type
     end
 
-    def define_hours: () { () -> untyped } -> OpeningHours::Schedule
+    def define_hours: () -> OpeningHours::Schedule
+                  | () { () -> untyped } -> OpeningHours::Schedule
     def open?: (?at: untyped) -> bool
   end
 end

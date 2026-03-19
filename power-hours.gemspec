@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
     ls.readlines("\x0", chomp: true)
       .select { |f| File.file?(File.join(__dir__, f)) }
       .reject do |f|
-        (f == gemspec) || f.start_with?(*%w[bin/ Gemfile .gitignore test/])
+        (f == gemspec) || f.end_with?(".gem") || f.start_with?(*%w[bin/ Gemfile .gitignore test/])
       end
   end
   spec.bindir = "exe"

@@ -11,8 +11,8 @@ class ScheduleTest < Minitest::Test
     assert schedule.open?(at: Time.new(2024, 1, 6, 1, 0, 0))  # Saturday (Friday overnight)
   end
 
-  def test_build_requires_a_block
-    assert_raises(ArgumentError) { Schedule.build }
+  def test_build_without_block_returns_blank_schedule
+    assert_equal Schedule.new, Schedule.build
   end
 
   def test_open_during_same_day_window
@@ -167,6 +167,38 @@ class ScheduleTest < Minitest::Test
         sat: []
       },
       schedule.to_h
+    )
+  end
+
+  def test_as_json_excludes_empty_days_by_default
+    schedule = Schedule.new(
+      mon: ["09:00-17:00"]
+    )
+
+    assert_equal(
+      {
+        mon: ["09:00-17:00"]
+      },
+      schedule.as_json
+    )
+  end
+
+  def test_as_json_can_include_empty_days
+    schedule = Schedule.new(
+      mon: ["09:00-17:00"]
+    )
+
+    assert_equal(
+      {
+        sun: [],
+        mon: ["09:00-17:00"],
+        tue: [],
+        wed: [],
+        thu: [],
+        fri: [],
+        sat: []
+      },
+      schedule.as_json(include_empty: true)
     )
   end
 end

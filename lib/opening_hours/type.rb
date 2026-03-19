@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require "active_model"
+
 module OpeningHours
-  module TypeBehavior
+  class Type < ActiveModel::Type::Value
     def type
       :opening_hours
     end
@@ -10,16 +12,12 @@ module OpeningHours
       coerce(value)
     end
 
-    def deserialize(value)
-      coerce(value)
-    end
-
     def serialize(value)
-      coerce(value).to_h
+      coerce(value).as_json(include_empty: false)
     end
 
     def changed_in_place?(raw_old_value, new_value)
-      deserialize(raw_old_value).to_h != cast(new_value).to_h
+      deserialize(raw_old_value) != cast(new_value)
     end
 
     private
@@ -40,16 +38,6 @@ module OpeningHours
 
         raise ArgumentError, "Cannot cast #{value.inspect} to OpeningHours::Schedule"
       end
-    end
-  end
-
-  if defined?(::ActiveModel::Type::Value)
-    class Type < ::ActiveModel::Type::Value
-      include TypeBehavior
-    end
-  else
-    class Type
-      include TypeBehavior
     end
   end
 end
