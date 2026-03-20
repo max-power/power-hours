@@ -20,6 +20,19 @@ class TypeTest < Minitest::Test
     assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0))
   end
 
+  def test_cast_json_object_string_returns_schedule
+    schedule = @type.cast('{"mon":["09:00-17:00"]}')
+
+    assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0))
+  end
+
+  def test_cast_empty_json_object_string_returns_empty_schedule
+    schedule = @type.cast("{}")
+
+    assert_instance_of Schedule, schedule
+    refute schedule.open?(at: Time.new(2024, 1, 1, 12, 0, 0))
+  end
+
   def test_cast_schedule_returns_same_object
     schedule = Schedule.new(mon: ["09:00-17:00"])
 
@@ -57,6 +70,11 @@ class TypeTest < Minitest::Test
   def test_changed_in_place_detects_differences
     refute @type.changed_in_place?({ "mon" => ["09:00-17:00"] }, { mon: ["09:00-17:00"] })
     assert @type.changed_in_place?({ "mon" => ["09:00-17:00"] }, { mon: ["10:00-17:00"] })
+  end
+
+  def test_changed_in_place_accepts_json_object_string_from_database
+    refute @type.changed_in_place?("{}", {})
+    assert @type.changed_in_place?('{"mon":["09:00-17:00"]}', { mon: ["10:00-17:00"] })
   end
 
   def test_changed_in_place_uses_schedule_value_equality

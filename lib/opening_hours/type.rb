@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_model"
+require "json"
 
 module OpeningHours
   class Type < ActiveModel::Type::Value
@@ -30,6 +31,8 @@ module OpeningHours
         schedule
       in Hash => hash
         OpeningHours::Schedule.build(hash)
+      in String => string if (hash = hash_from_json_string(string))
+        OpeningHours::Schedule.build(hash)
       in candidate if (hash = hash_from(candidate))
         OpeningHours::Schedule.build(hash)
       else
@@ -42,6 +45,13 @@ module OpeningHours
 
       hash = value.to_h
       hash if hash.is_a?(Hash)
+    end
+
+    def hash_from_json_string(value)
+      parsed = JSON.parse(value)
+      parsed if parsed.is_a?(Hash)
+    rescue JSON::ParserError
+      nil
     end
   end
 end
