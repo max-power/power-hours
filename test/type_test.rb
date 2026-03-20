@@ -55,10 +55,14 @@ class TypeTest < Minitest::Test
     assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0))
   end
 
-  def test_serialize_schedule_returns_hash
+  def test_serialize_schedule_returns_json_string
     schedule = Schedule.new(mon: ["09:00-17:00"])
 
-    assert_equal ["09:00-17:00"], @type.serialize(schedule)[:mon]
+    assert_equal({ "mon" => ["09:00-17:00"] }, JSON.parse(@type.serialize(schedule)))
+  end
+
+  def test_serialize_nil_returns_empty_json_object_string
+    assert_equal "{}", @type.serialize(nil)
   end
 
   def test_deserialize_hash_returns_schedule

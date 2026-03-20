@@ -82,7 +82,7 @@ module OpeningHours
   class Type
     def type: () -> Symbol
     def cast: (untyped value) -> OpeningHours::Schedule
-    def serialize: (untyped value) -> serialized_schedule
+    def serialize: (untyped value) -> String
     def changed_in_place?: (untyped raw_old_value, untyped new_value) -> bool
   end
 

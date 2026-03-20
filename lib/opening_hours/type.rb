@@ -14,7 +14,7 @@ module OpeningHours
     end
 
     def serialize(value)
-      coerce(value).as_json(include_empty: false)
+      JSON.generate(coerce(value).as_json(include_empty: false))
     end
 
     def changed_in_place?(raw_old_value, new_value)
