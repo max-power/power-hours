@@ -2,6 +2,8 @@
 
 module OpeningHours
   class TimeWindow < Data.define(:opens, :closes)
+    include Comparable
+
     def self.[](input)
       case input
       in TimeWindow => tw
@@ -38,6 +40,10 @@ module OpeningHours
       else
         time >= opens && time <= closes
       end
+    end
+
+    def <=>(other)
+      opens <=> TimeWindow[other].opens
     end
   end
 end

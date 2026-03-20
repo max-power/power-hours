@@ -5,6 +5,7 @@ Power Hours provides a small, explicit DSL for weekly opening-hours schedules.
 It supports:
 - multiple windows per day
 - overnight windows (for example `22:00-02:00`)
+- stable ordering of windows within each day
 - serialization to/from hashes
 - optional model mixin helpers via `OpeningHours::Model`
 
@@ -39,11 +40,13 @@ schedule.open?(at: Time.new(2024, 1, 6, 1, 0, 0))  # => true (Saturday, from Fri
 ### Construct directly from hash data
 
 ```ruby
-schedule = OpeningHours::Schedule.from_hash(
+schedule = OpeningHours::Schedule.build(
   "mon" => ["09:00-17:00"],
   "fri" => ["22:00-02:00"]
 )
 ```
+
+If both a hash and a block are passed to `Schedule.build`, the block definition is used.
 
 ### Serialize for persistence
 
@@ -66,6 +69,23 @@ schedule.as_json
 # }
 
 schedule.as_json(include_empty: true) # include empty weekdays too
+```
+
+### Simple string output
+
+```ruby
+schedule.to_s
+# MON: 09:00-17:00
+# FRI: 22:00-02:00
+
+schedule.to_s(true) # include empty weekdays too
+# SUN:
+# MON: 09:00-17:00
+# TUE:
+# WED:
+# THU:
+# FRI: 22:00-02:00
+# SAT:
 ```
 
 ### Optional mixin for app models

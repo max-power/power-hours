@@ -23,12 +23,15 @@ module OpeningHours
   end
 
   class TimeWindow
+    include Comparable[time_window_input]
+
     attr_reader opens: OpeningHours::TimeOfDay
     attr_reader closes: OpeningHours::TimeOfDay
 
     def self.[]: (time_window_input input) -> OpeningHours::TimeWindow
     def initialize: (opens: time_input, closes: time_input) -> void
 
+    def <=>: (time_window_input other) -> Integer?
     def to_a: () -> [OpeningHours::TimeOfDay, OpeningHours::TimeOfDay]
     def to_s: () -> String
     def overnight?: () -> bool
@@ -44,9 +47,8 @@ module OpeningHours
     attr_reader fri: Array[OpeningHours::TimeWindow]
     attr_reader sat: Array[OpeningHours::TimeWindow]
 
-    def self.build: () -> OpeningHours::Schedule
-                | () { () -> untyped } -> OpeningHours::Schedule
-    def self.from_hash: (Hash[Symbol | String, untyped] hash) -> OpeningHours::Schedule
+    def self.build: (?Hash[Symbol | String, untyped] hash) -> OpeningHours::Schedule
+                | (?Hash[Symbol | String, untyped] hash) { () -> untyped } -> OpeningHours::Schedule
     def initialize: (
       ?mon: day_windows_input,
       ?tue: day_windows_input,
@@ -60,6 +62,7 @@ module OpeningHours
     def open?: (?at: untyped) -> bool
     def to_h: () -> serialized_schedule
     def as_json: (?Hash[Symbol, untyped] options) -> serialized_schedule
+    def to_s: (?bool include_empty) -> String
   end
 
   class Builder

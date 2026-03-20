@@ -117,4 +117,17 @@ class TimeWindowTest < Minitest::Test
     assert w.cover?("00:00")
     refute w.cover?("00:01")
   end
+
+  def test_compare_orders_by_open_time
+    windows = [
+      TimeWindow["13:00-17:00"],
+      TimeWindow["09:00-12:00"],
+      TimeWindow["18:00-20:00"]
+    ]
+
+    assert_equal(
+      ["09:00-12:00", "13:00-17:00", "18:00-20:00"],
+      windows.sort.map(&:to_s)
+    )
+  end
 end

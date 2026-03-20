@@ -15,6 +15,31 @@ class ScheduleTest < Minitest::Test
     assert_equal Schedule.new, Schedule.build
   end
 
+  def test_build_from_hash_normalizes_string_keys
+    schedule = Schedule.build(
+      "mon" => ["09:00-17:00"]
+    )
+
+    assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0)) # Monday
+  end
+
+  def test_build_prefers_block_when_hash_and_block_are_provided
+    schedule = Schedule.build({ mon: ["09:00-17:00"] }) do
+      tue "10:00".."12:00"
+    end
+
+    refute schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0)) # Monday
+    assert schedule.open?(at: Time.new(2024, 1, 2, 11, 0, 0)) # Tuesday
+  end
+
+  def test_normalize_day_sorts_windows_by_open_time
+    schedule = Schedule.new(
+      mon: ["13:00-17:00", "09:00-12:00", "18:00-20:00"]
+    )
+
+    assert_equal ["09:00-12:00", "13:00-17:00", "18:00-20:00"], schedule.mon.map(&:to_s)
+  end
+
   def test_day_arrays_are_immutable
     schedule = Schedule.new(mon: ["09:00-17:00"])
 
@@ -149,14 +174,6 @@ class ScheduleTest < Minitest::Test
     refute schedule.open?
   end
 
-  def test_from_hash_normalizes_string_keys
-    schedule = Schedule.from_hash(
-      "mon" => ["09:00-17:00"]
-    )
-
-    assert schedule.open?(at: Time.new(2024, 1, 1, 10, 0, 0)) # Monday
-  end
-
   def test_open_at_end_of_previous_days_overnight_window
     schedule = Schedule.new(
       mon: ["22:00-02:00"]
@@ -215,6 +232,26 @@ class ScheduleTest < Minitest::Test
         sat: []
       },
       schedule.as_json(include_empty: true)
+    )
+  end
+
+  def test_to_s_excludes_empty_days_by_default
+    schedule = Schedule.new(
+      mon: ["09:00-17:00"],
+      fri: ["22:00-02:00"]
+    )
+
+    assert_equal("MON: 09:00-17:00\nFRI: 22:00-02:00", schedule.to_s)
+  end
+
+  def test_to_s_can_include_empty_days
+    schedule = Schedule.new(
+      mon: ["09:00-17:00"]
+    )
+
+    assert_equal(
+      "SUN: \nMON: 09:00-17:00\nTUE: \nWED: \nTHU: \nFRI: \nSAT: ",
+      schedule.to_s(true)
     )
   end
 end

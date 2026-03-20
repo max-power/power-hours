@@ -3,16 +3,14 @@
 module OpeningHours
   class Schedule < Data.define(:sun, :mon, :tue, :wed, :thu, :fri, :sat)
     class << self
-      def build(&block)
-        return new unless block_given?
-
-        builder = Builder.new
-        builder.instance_eval(&block)
-        builder.schedule
-      end
-
-      def from_hash(hash)
-        new(**hash.to_h.transform_keys(&:to_sym))
+      def build(hash = {}, &block)
+        if block_given?
+          builder = Builder.new
+          builder.instance_eval(&block)
+          builder.schedule
+        else
+          new(**hash.to_h.transform_keys(&:to_sym))
+        end
       end
     end
 
@@ -30,7 +28,7 @@ module OpeningHours
 
     def open?(at: Time.now)
       current_time = at.strftime("%H:%M")
-      windows_to_check(at).any? { |window| window.cover?(current_time) }
+      windows_to_check(at).any? { it.cover?(current_time) }
     end
 
     def to_h
@@ -42,10 +40,16 @@ module OpeningHours
       include_empty ? to_h : to_h.reject { |_day, windows| windows.empty? }
     end
 
+    def to_s(include_empty = false)
+      as_json(include_empty: include_empty).map do |day, windows|
+        "#{day.upcase}: #{windows.join(', ')}"
+      end.join("\n")
+    end
+
     private
 
     def normalize_day(values)
-      Array(values).map { TimeWindow[it] }.freeze
+      Array(values).map { TimeWindow[it] }.sort.freeze
     end
 
     # Check current day windows + previous day's overnight leftovers

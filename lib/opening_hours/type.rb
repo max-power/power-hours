@@ -29,9 +29,9 @@ module OpeningHours
       in OpeningHours::Schedule => schedule
         schedule
       in Hash => hash
-        OpeningHours::Schedule.from_hash(hash)
+        OpeningHours::Schedule.build(hash)
       in candidate if (hash = hash_from(candidate))
-        OpeningHours::Schedule.from_hash(hash)
+        OpeningHours::Schedule.build(hash)
       else
         raise ArgumentError, "Cannot cast #{value.inspect} to OpeningHours::Schedule"
       end
