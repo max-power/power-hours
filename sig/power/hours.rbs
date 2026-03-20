@@ -14,7 +14,8 @@ module OpeningHours
     attr_reader min: Integer
 
     def self.[]: (time_input input) -> OpeningHours::TimeOfDay
-    def initialize: (time_input input) -> void
+    def self.new: (?hour: Integer, ?min: Integer) -> OpeningHours::TimeOfDay
+    def initialize: (?hour: Integer, ?min: Integer) -> void
 
     def <=>: (time_input other) -> Integer?
     def to_minutes: () -> Integer
